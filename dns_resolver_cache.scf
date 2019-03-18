@@ -1,0 +1,115 @@
+ltm node dns.quad9.net {
+    address 9.9.9.9
+    monitor none 
+    session monitor-enabled
+}
+ltm node google-public-dns-a.google.com {
+    address 8.8.8.8
+    monitor none 
+    session monitor-enabled
+}
+ltm node google-public-dns-b.google.com {
+    address 8.8.4.4
+    monitor none 
+    session monitor-enabled
+}
+ltm node one.one.one.one {
+    address 1.1.1.1
+    monitor none 
+    session monitor-enabled
+}
+ltm node one.zero.zero.one {
+    address 1.0.0.1
+    monitor none 
+    session monitor-enabled
+}
+ltm monitor dns google_dns_monitor {
+    accept-rcode no-error
+    adaptive disabled
+    answer-contains query-type
+    defaults-from dns
+    destination *:*
+    interval 15
+    qname www.google.com
+    qtype a
+    recv none
+    time-until-up 0
+    timeout 46
+}
+ltm pool dns_resolver_pool {
+    members {
+        dns.quad9.net:domain {
+            address 9.9.9.9
+            session monitor-enabled
+            state up
+        }
+        google-public-dns-a.google.com:domain {
+            address 8.8.8.8
+            session monitor-enabled
+            state up
+        }
+        google-public-dns-b.google.com:domain {
+            address 8.8.4.4
+            session monitor-enabled
+            state up
+        }
+        one.one.one.one:domain {
+            address 1.1.1.1
+            session monitor-enabled
+            state up
+        }
+        one.zero.zero.one:domain {
+            address 1.0.0.1
+            session monitor-enabled
+            state up
+        }
+    }
+    monitor google_dns_monitor 
+}
+ltm dns cache transparent dns_transparent_cache { }
+ltm profile dns dns_resolver_cache {
+    app-service none
+    cache dns_transparent_cache
+    defaults-from dns
+    enable-cache yes
+    enable-dns-express no
+    enable-dnssec no
+    enable-gtm no
+    process-rd yes
+    unhandled-query-action allow
+    use-local-bind no
+}
+ltm virtual dns_udp_vs {
+    description "DNS Resolver - UDP"
+    destination 10.1.20.130:domain
+    ip-protocol udp
+    mask 255.255.255.255
+    pool dns_resolver_pool
+    profiles {
+        dns_resolver_cache { }
+        udp_gtm_dns { }
+    }
+    source 0.0.0.0/0
+    source-address-translation {
+        type automap
+    }
+    translate-address enabled
+    translate-port enabled
+}
+ltm virtual dns_tcp_vs {
+    description "DNS Resolver - TCP"
+    destination 10.1.20.130:domain
+    ip-protocol tcp
+    mask 255.255.255.255
+    pool dns_resolver_pool
+    profiles {
+        dns_resolver_cache { }
+        tcp { }
+    }
+    source 0.0.0.0/0
+    source-address-translation {
+        type automap
+    }
+    translate-address enabled
+    translate-port enabled
+}
