@@ -1,6 +1,10 @@
-# Global Settings
+# Disable GUI Setup
 modify sys global-settings gui-setup disabled
+
+# Change Records per screen from 10 to 50
 modify sys db ui.system.preferences.recordsperscreen { value 50 }
+
+# Hostname
 modify sys global-settings hostname bigip.f5.demo
 
 # Create VLANs - External / Internal
@@ -14,9 +18,11 @@ create net self internal_self address 10.1.20.245/24 vlan ingress_vlan allow-ser
 # Create Default Route
 create net route default_route gw 10.1.10.254 network default
 
-# Set DNS and NTP
+# Configure DNS
 modify sys dns description none
 modify sys dns name-servers replace-all-with { 1.1.1.1 8.8.8.8 9.9.9.9 }
+
+# Configure NTP
 modify sys ntp timezone Australia/Brisbane
 modify sys ntp servers replace-all-with { 0.au.pool.ntp.org 1.au.pool.ntp.org }
 
@@ -24,9 +30,11 @@ modify sys ntp servers replace-all-with { 0.au.pool.ntp.org 1.au.pool.ntp.org }
 modify auth password root
 modify auth user admin prompt-for-password
 
+# Install License
+install sys license registration-key <registration-key>
+
 # Set Static MGMT IP
 modify sys global-settings mgmt-dhcp disabled
 create sys management-ip 10.1.1.245/24 description none
 delete sys management-route default
 create sys management-route default gateway 10.1.1.254
-save sys config
