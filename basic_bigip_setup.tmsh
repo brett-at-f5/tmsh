@@ -11,6 +11,10 @@ modify sys global-settings hostname bigip.f5.demo
 create net vlan external_vlan interfaces add { 1.1 } tag 110
 create net vlan internal_vlan interfaces add { 1.2 } tag 120
 
+# Create dot1Q tagged VLANs - External / Internal
+create net vlan external_vlan interfaces add { 1.1 { tagged } } tag 110
+create net vlan internalt_vlan interfaces add { 1.1 { tagged } } tag 120
+
 # Create Self IPs
 create net self external_self address 10.1.10.245/24 vlan external_vlan allow-service none
 create net self internal_self address 10.1.20.245/24 vlan ingress_vlan allow-service none
