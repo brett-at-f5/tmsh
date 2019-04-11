@@ -79,7 +79,7 @@ ltm profile dns dns_resolver_cache {
     unhandled-query-action allow
     use-local-bind no
 }
-ltm virtual dns_udp_vs {
+ltm virtual dns_resolver_udp_vs {
     description "DNS Resolver - UDP"
     destination 10.1.20.130:domain
     ip-protocol udp
@@ -96,7 +96,7 @@ ltm virtual dns_udp_vs {
     translate-address enabled
     translate-port enabled
 }
-ltm virtual dns_tcp_vs {
+ltm virtual dns_resolver_tcp_vs {
     description "DNS Resolver - TCP"
     destination 10.1.20.130:domain
     ip-protocol tcp
