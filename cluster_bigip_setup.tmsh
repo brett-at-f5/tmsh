@@ -17,12 +17,12 @@ modify sys global-settings hostname 4000-1.f5.demo
 # Create dot1Q tagged VLANs - External / Internal
 create net vlan bigip_ext_vlan interfaces add { 1.1 { tagged } } tag 110
 create net vlan bigip_int_vlan interfaces add { 1.1 { tagged } } tag 120
-create net vlan app_server_vlan interfaces add { 1.1 { tagged } } tag 130
+create net vlan ha_vlan interfaces add { 1.8 } tag 180
 
 # Create Self IPs
 create net self bigip_ext_self address 10.1.10.141/24 vlan bigip_ext_vlan allow-service none
 create net self bigip_int_self address 10.1.20.141/24 vlan bigip_int_vlan allow-service default
-create net self app_server_self address 10.1.30.141/24 vlan app_server_vlan allow-service none
+create net self ha_self address 10.1.245.141/24 vlan ha_vlan allow-service all
 
 # Create Default Route
 create net route default_route gw 10.1.10.254 network default
@@ -41,8 +41,8 @@ modify auth user admin prompt-for-password
 
 # Rename the device, setup configsync and unicast for failover
 mv cm device bigip1.local 4000-1.f5.demo
-modify cm device 4000-1.f5.demo configsync-ip 10.1.20.141
-modify cm device 4000-1.f5.demo unicast-address {{ ip 10.1.20.141 }}
+modify cm device 4000-1.f5.demo configsync-ip 10.1.245.141
+modify cm device 4000-1.f5.demo unicast-address {{ ip 10.1.245.141 }}
 
 
 ## 4000-2.f5.demo ##
@@ -64,12 +64,12 @@ modify sys global-settings hostname 4000-2.f5.demo
 # Create dot1Q tagged VLANs - External / Internal
 create net vlan bigip_ext_vlan interfaces add { 1.1 { tagged } } tag 110
 create net vlan bigip_int_vlan interfaces add { 1.1 { tagged } } tag 120
-create net vlan app_server_vlan interfaces add { 1.1 { tagged } } tag 130
+create net vlan ha_vlan interfaces add { 1.8 } tag 180
 
 # Create Self IPs
 create net self bigip_ext_self address 10.1.10.142/24 vlan bigip_ext_vlan allow-service none
 create net self bigip_int_self address 10.1.20.142/24 vlan bigip_int_vlan allow-service default
-create net self app_server_self address 10.1.30.142/24 vlan app_server_vlan allow-service none
+create net self ha_self address 10.1.245.142/24 vlan ha_vlan allow-service all
 
 # Create Default Route
 create net route default_route gw 10.1.10.254 network default
@@ -104,5 +104,4 @@ run sys failover standby
 # Create Floating Self IPs
 create net self bigip_ext_float address 10.1.10.140/24 vlan bigip_ext_vlan allow-service none traffic-group traffic-group-1
 create net self bigip_int_float address 10.1.20.140/24 vlan bigip_int_vlan allow-service default traffic-group traffic-group-1
-create net self app_server_float address 10.1.30.140/24 vlan app_server_vlan allow-service none traffic-group traffic-group-1
 run cm config-sync to-group device_group_1
