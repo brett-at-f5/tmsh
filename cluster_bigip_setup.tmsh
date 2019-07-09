@@ -1,0 +1,108 @@
+## 4000-1.f5.demo ##
+# Set Static MGMT IP
+modify sys global-settings mgmt-dhcp disabled
+delete sys management-route default
+create sys management-route default gateway 10.1.1.254
+create sys management-ip 10.1.1.141/24 description none
+
+# Disable GUI Setup
+modify sys global-settings gui-setup disabled
+
+# Change Records per screen from 10 to 50
+modify sys db ui.system.preferences.recordsperscreen { value 50 }
+
+# Hostname
+modify sys global-settings hostname 4000-1.f5.demo
+
+# Create dot1Q tagged VLANs - External / Internal
+create net vlan bigip_ext_vlan interfaces add { 1.1 { tagged } } tag 110
+create net vlan bigip_int_vlan interfaces add { 1.1 { tagged } } tag 120
+create net vlan app_server_vlan interfaces add { 1.1 { tagged } } tag 130
+
+# Create Self IPs
+create net self bigip_ext_self address 10.1.10.141/24 vlan bigip_ext_vlan allow-service none
+create net self bigip_int_self address 10.1.20.141/24 vlan bigip_int_vlan allow-service default
+create net self app_server_self address 10.1.30.141/24 vlan app_server_vlan allow-service none
+
+# Create Default Route
+create net route default_route gw 10.1.10.254 network default
+
+# Configure DNS
+modify sys dns description none
+modify sys dns name-servers replace-all-with { 10.1.20.1 10.1.20.2 }
+
+# Configure NTP
+modify sys ntp timezone Australia/Brisbane
+modify sys ntp servers replace-all-with { ntp1.f5.demo ntp2.f5.demo }
+
+# Change root and admin password
+modify auth password root
+modify auth user admin prompt-for-password
+
+# Rename the device, setup configsync and unicast for failover
+mv cm device bigip1.local 4000-1.f5.demo
+modify cm device 4000-1.f5.demo configsync-ip 10.1.20.141
+modify cm device 4000-1.f5.demo unicast-address {{ ip 10.1.20.141 }}
+
+
+## 4000-2.f5.demo ##
+# Set Static MGMT IP
+modify sys global-settings mgmt-dhcp disabled
+delete sys management-route default
+create sys management-route default gateway 10.1.1.254
+create sys management-ip 10.1.1.142/24 description none
+
+# Disable GUI Setup
+modify sys global-settings gui-setup disabled
+
+# Change Records per screen from 10 to 50
+modify sys db ui.system.preferences.recordsperscreen { value 50 }
+
+# Hostname
+modify sys global-settings hostname 4000-2.f5.demo
+
+# Create dot1Q tagged VLANs - External / Internal
+create net vlan bigip_ext_vlan interfaces add { 1.1 { tagged } } tag 110
+create net vlan bigip_int_vlan interfaces add { 1.1 { tagged } } tag 120
+create net vlan app_server_vlan interfaces add { 1.1 { tagged } } tag 130
+
+# Create Self IPs
+create net self bigip_ext_self address 10.1.10.142/24 vlan bigip_ext_vlan allow-service none
+create net self bigip_int_self address 10.1.20.142/24 vlan bigip_int_vlan allow-service default
+create net self app_server_self address 10.1.30.142/24 vlan app_server_vlan allow-service none
+
+# Create Default Route
+create net route default_route gw 10.1.10.254 network default
+
+# Configure DNS
+modify sys dns description none
+modify sys dns name-servers replace-all-with { 10.1.20.1 10.1.20.2 }
+
+# Configure NTP
+modify sys ntp timezone Australia/Brisbane
+modify sys ntp servers replace-all-with { ntp1.f5.demo ntp2.f5.demo }
+
+# Change root and admin password
+modify auth password root
+modify auth user admin prompt-for-password
+
+# Rename the device, setup configsync and unicast for failover
+mv cm device bigip1.local 4000-2.f5.demo
+modify cm device 4000-2.f5.demo configsync-ip 10.1.20.142
+modify cm device 4000-2.f5.demo unicast-address {{ ip 10.1.20.142 }}
+
+
+## 4000-1.f5.demo ##
+modify cm trust-domain /Common/Root add-device { device-ip 10.1.1.142 device-name 4000-2.f5.demo username admin password <password> ca-device true }
+create cm device-group device_group_1 type sync-failover devices add { 4000-1.f5.demo 4000-2.f5.demo }
+run cm config-sync to-group device_group_1
+show cm sync-status
+
+# Test Failover from current Active
+run sys failover standby
+
+# Create Floating Self IPs
+create net self bigip_ext_float address 10.1.10.140/24 vlan bigip_ext_vlan allow-service none traffic-group traffic-group-1
+create net self bigip_int_float address 10.1.20.140/24 vlan bigip_int_vlan allow-service default traffic-group traffic-group-1
+create net self app_server_float address 10.1.30.140/24 vlan app_server_vlan allow-service none traffic-group traffic-group-1
+run cm config-sync to-group device_group_1
