@@ -1,5 +1,5 @@
 ## Example BIG-IP Cluster configuration ##
-## Names and IP using in this Example ##
+## Names and IP Addressing used in this Example ##
 # BIG-IP A:
 #   Hostname: 4000-1.f5.demo
 #   Management IP: 10.1.1.141 /24
