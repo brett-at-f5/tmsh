@@ -28,8 +28,6 @@
 #       Name: ha_vlan
 #       Self IP: 10.1.245.142 /24
 
-
-
 ## 4000-1.f5.demo ##
 # Set Static MGMT IP
 modify sys global-settings mgmt-dhcp disabled
