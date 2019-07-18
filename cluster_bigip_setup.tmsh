@@ -1,3 +1,35 @@
+## Example BIG-IP Cluster configuration ##
+## Names and IP using in this Example ##
+# BIG-IP A:
+#   Hostname: 4000-1.f5.demo
+#   Management IP: 10.1.1.141 /24
+#   3x VLANs:
+#     External:
+#       Name: bigip_ext_vlan
+#       Self IP: 10.1.10.141 /24
+#     Internal:
+#       Name: bigip_int_vlan
+#       Self IP: 10.1.20.141 /24
+#     HA(Sync):
+#       Name: ha_vlan
+#       Self IP: 10.1.245.141 /24
+
+# BIG-IP B:
+#   Hostname: 4000-2.f5.demo
+#   Management IP: 10.1.1.142 /24
+#   3x VLANs:
+#     External:
+#       Name: bigip_ext_vlan
+#       Self IP: 10.1.10.142 /24
+#     Internal:
+#       Name: bigip_int_vlan
+#       Self IP: 10.1.20.142 /24
+#     HA(Sync):
+#       Name: ha_vlan
+#       Self IP: 10.1.245.142 /24
+
+
+
 ## 4000-1.f5.demo ##
 # Set Static MGMT IP
 modify sys global-settings mgmt-dhcp disabled
@@ -35,7 +67,7 @@ modify sys dns name-servers replace-all-with { 10.1.20.1 10.1.20.2 }
 modify sys ntp timezone Australia/Brisbane
 modify sys ntp servers replace-all-with { ntp1.f5.demo ntp2.f5.demo }
 
-# Change root and admin password
+# Change root and admin password (if required)
 modify auth password root
 modify auth user admin prompt-for-password
 
@@ -82,7 +114,7 @@ modify sys dns name-servers replace-all-with { 10.1.20.1 10.1.20.2 }
 modify sys ntp timezone Australia/Brisbane
 modify sys ntp servers replace-all-with { ntp1.f5.demo ntp2.f5.demo }
 
-# Change root and admin password
+# Change root and admin password (if required)
 modify auth password root
 modify auth user admin prompt-for-password
 
