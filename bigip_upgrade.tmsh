@@ -1,4 +1,5 @@
 ## Upgrade BIG-IP Version ##
+
 # Copy ISO file from local machine to BIG-IP after verifing checksum
 scp BIGIP-13.1.1.5-0.0.4.iso root@4000-1.f5.demo:/shared/images/
 scp BIGIP-13.1.1.5-0.0.4.iso root@4000-2.f5.demo:/shared/images/
@@ -16,8 +17,8 @@ HD1.1    BIG-IP  13.1.0.6  0.0.3     yes  complete
 # Install software and create new volume
 install sys software image BIGIP-13.1.1.5-0.0.4.iso create-volume volume HD1.2
 
-# Install software in an existing volume
-install sys software image BIGIP-14.1.0.6-0.0.9.iso volume HD1.1
+# OR Install software in an existing volume
+install sys software image BIGIP-13.1.1.5-0.0.4.iso volume HD1.1
 
 show sys software status 
 
@@ -57,8 +58,8 @@ HD1.1    BIG-IP  13.1.0.6  0.0.3     yes  complete
 # Install software and create new volume
 install sys software image BIGIP-13.1.1.5-0.0.4.iso create-volume volume HD1.2
 
-# Install software in an existing volume
-install sys software image BIGIP-14.1.0.6-0.0.9.iso volume HD1.1
+# OR Install software in an existing volume
+install sys software image BIGIP-13.1.1.5-0.0.4.iso volume HD1.1
 
 -----------------------------------------------------------------------------------
 Sys::Software Status
