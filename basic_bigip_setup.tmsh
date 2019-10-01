@@ -42,3 +42,7 @@ modify sys global-settings mgmt-dhcp disabled
 create sys management-ip 10.1.1.245/24 description none
 delete sys management-route default
 create sys management-route default gateway 10.1.1.254
+
+# Default Node Monitor
+create ltm monitor icmp default_node_monitor defaults-from icmp
+modify ltm default-node-monitor rule default_node_monitor
