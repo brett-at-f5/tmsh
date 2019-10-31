@@ -1,0 +1,4 @@
+create ltm node centos7.f5.demo { address 10.1.30.105 description "Centos 7 Linux" }
+create ltm pool hsl_log_5400_pool { members replace-all-with { centos7.f5.demo:5400 } }
+create sys log-config destination remote-high-speed-log hsl_log_5400_dest { pool-name hsl_log_5400_pool protocol udp }
+create sys log-config publisher hsl_log_5400_pub destinations replace-all-with { hsl_log_5400_dest }
