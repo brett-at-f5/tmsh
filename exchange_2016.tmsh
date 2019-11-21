@@ -1,0 +1,104 @@
+load sys config merge from-terminal 
+
+ltm profile http exchange2016_http_profile { defaults-from http insert-xforwarded-for enabled redirect-rewrite all }
+ltm profile http-compression exchange2016_compression_profile { content-type-include { "application/(css|css-stylesheet|doc|excel|javascript|json|lotus123|mdb|mpp|msaccess|msexcel|ms-excel|mspowerpoint|ms-powerpoint|msproject|msword|ms-word|photoshop|postscript|powerpoint|ps|psd|quarkexpress|rtf|txt|visio|vnd\\.excel|vnd\\.msaccess|vnd\\.ms-access|vnd\\.msexcel|vnd\\.ms-excel|vnd\\.mspowerpoint|vnd\\.ms-powerpoint|vnd\\.ms-pps|vnd\\.ms-project|vnd\\.msword|vnd\\.ms-word|vnd\\.ms-works|vnd\\.ms-works-db|vnd\\.powerpoint|vnd\\.visio|vnd\\.wap\\.cmlscriptc|vnd\\.wap\\.wmlc|vnd\\.wap\\.xhtml\\+xml|vnd\\.word|vsd|winword|wks|word|x-excel|xhtml\\+xml|x-java-jnlp-file|x-javascript|x-json|x-lotus123|xls|x-mdb|xml|x-mscardfile|x-msclip|x-msexcel|x-ms-excel|x-mspowerpoint|x-msproject|x-ms-project|x-msword|x-msworks-db|x-msworks-wps|x-photoshop|x-postscript|x-powerpoint|x-ps|x-quark-express|x-rtf|x-vermeer-rpc|x-visio|x-vsd|x-wks|x-word|x-xls|x-xml)" "image/(photoshop|psd|x-photoshop|x-vsd)" "text/(css|html|javascript|json|plain|postscript|richtext|rtf|vnd\\.wap\\.wml|vnd\\.wap\\.wmlscript|wap|wml|x-component|xml|x-vcalendar|x-vcard)" } defaults-from wan-optimized-compression }
+ltm profile one-connect exchange2016_oneconnect { defaults-from oneconnect source-mask 255.255.255.255 }
+ltm profile tcp exchange2016_server_tcp_profile { defaults-from f5-tcp-lan idle-timeout 2100 }
+ltm profile tcp exchange2016_client_tcp_profile { defaults-from f5-tcp-wan idle-timeout 2100 nagle disabled }
+ltm profile web-acceleration exchange2016_caching_profile { applications none cache-uri-exclude { /owa/ev.owa oab.xml } defaults-from optimized-caching }
+
+ltm monitor https exchange2016_as_https_monitor { adaptive disabled defaults-from https destination *:* interval 10 ip-dscp 0 recv "200 OK" recv-disable none send "GET /Microsoft-Server-Activesync/healthcheck.htm HTTP/1.1\r\nHost: mail.example.com\r\nConnection: Close\r\n\r\n" time-until-up 0 timeout 31 }
+ltm monitor https exchange2016_ews_https_monitor { adaptive disabled defaults-from https destination *:* interval 10 ip-dscp 0 recv "200 OK" recv-disable none send "GET /EWS/healthcheck.htm HTTP/1.1\r\nHost: mail.example.com\r\nConnection: Close\r\n\r\n" time-until-up 0 timeout 31 }
+ltm monitor https exchange2016_mapi_https_monitor { adaptive disabled defaults-from https destination *:* interval 10 ip-dscp 0 recv "200 OK" recv-disable none send "GET /mapi/healthcheck.htm HTTP/1.1\r\nHost: mail.example.com\r\nConnection: Close\r\n\r\n" time-until-up 0 timeout 31 }
+ltm monitor https exchange2016_owa_https_monitor { adaptive disabled defaults-from https destination *:* interval 10 ip-dscp 0 recv "200 OK" recv-disable none send "GET /owa/healthcheck.htm HTTP/1.1\r\nHost: mail.example.com\r\nConnection: Close\r\n\r\n" time-until-up 0 timeout 31 }
+
+ltm node exchange2016_cas1 { address 10.1.20.110 description "Exchange 2016 Mailbox Server and Client Access Server" }
+ltm node exchange2016_cas2 { address 10.1.20.111 description "Exchange 2016 Mailbox Server and Client Access Server" }
+
+ltm pool exchange2016_as_pool { load-balancing-mode least-connections-member members replace-all-with { exchange2016_cas1:443 exchange2016_cas2:443 } monitor exchange2016_as_https_monitor service-down-action reset slow-ramp-time 300 }
+ltm pool exchange2016_ews_pool { load-balancing-mode least-connections-member members replace-all-with { exchange2016_cas1:443 exchange2016_cas2:443 } monitor exchange2016_ews_https_monitor service-down-action reset slow-ramp-time 300 }
+ltm pool exchange2016_mapi_pool { load-balancing-mode least-connections-member members replace-all-with { exchange2016_cas1:443 exchange2016_cas2:443 } monitor exchange2016_mapi_https_monitor service-down-action reset slow-ramp-time 300 }
+ltm pool exchange2016_owa_pool { load-balancing-mode least-connections-member members replace-all-with { exchange2016_cas1:443 exchange2016_cas2:443 } monitor exchange2016_owa_https_monitor service-down-action reset slow-ramp-time 300 } 
+
+
+ltm rule exchange2016_owa_redirect_irule {
+priority 900
+when HTTP_REQUEST {
+    if { ([HTTP::uri] == "/") } {
+        HTTP::redirect https://[HTTP::host]/owa/
+    }
+}
+}
+ltm rule exchange2016_pool_select_irule {
+## Exchange iRule to select pool without persistence when all Exchange HTTP-based services are accessed through the same virtual server.
+when HTTP_REQUEST {
+    switch -glob -- [string tolower [HTTP::path]] {
+        "/microsoft-server-activesync*" {
+            TCP::idletime 1800
+            pool exchange2016_as_pool
+            COMPRESS::disable
+            CACHE::disable
+            return
+        }
+        "/owa*" {
+            ## Outlook Web Access
+            pool exchange2016_owa_pool
+            return
+        }
+        "/ecp*" {
+            ## Exchange Control Panel.
+            pool exchange2016_owa_pool
+            return
+        }
+        "/ews*" {
+            ## Exchange Web Services.
+            pool exchange2016_ews_pool
+            COMPRESS::disable
+            CACHE::disable
+            return
+        }
+        "/oab*" {
+            ## Offline Address Book.
+            pool exchange2016_ews_pool
+            persist none
+            return
+        }
+        "/mapi*" {
+            pool exchange2016_mapi_pool
+            COMPRESS::disable
+            CACHE::disable
+            return
+         }
+        "/rpc/rpcproxy.dll*" {
+            ## Outlook Anywhere.
+            COMPRESS::disable
+            CACHE::disable
+            return
+        }
+        "/autodiscover*" {
+            ## Requests for Autodiscovery information.
+            persist none
+            return
+        }
+        default {
+            pool exchange2016_as_pool
+        }
+    }
+}
+when HTTP_RESPONSE {
+    if { ( [HTTP::header exists "WWW-Authenticate"] &&
+        [string tolower [HTTP::header values "WWW-Authenticate"]] contains "negotiate" ) ||
+        ( [HTTP::header exists "Persistent-Auth"] &&
+        [string tolower [HTTP::header "Persistent-Auth"]] contains "true" ) } {
+        ONECONNECT::reuse disable
+        ONECONNECT::detach disable
+        NTLM::disable
+   }
+   if {[HTTP::header exists "Transfer-Encoding"]} {
+        HTTP::payload rechunk
+   }
+}
+}
+
+ltm virtual exchange2016_http_vs { destination 10.1.10.101:80 ip-protocol tcp mask 255.255.255.255 profiles { exchange2016_http_profile { } tcp { } } rules { _sys_https_redirect } source 0.0.0.0/0 source-address-translation { type automap } translate-address enabled translate-port enabled }
+ltm virtual exchange2016_https_vs { destination 10.1.10.101:443 ip-protocol tcp mask 255.255.255.255 profiles { exchange2016_caching_profile { } exchange2016_http_profile { } exchange2016_server_tcp_profile { context serverside } exchange2016_oneconnect { } exchange2016_compression_profile { } exchange2016_client_tcp_profile  { context clientside } f5se.net.au_clientssl { context clientside } ntlm { } serverssl-insecure-compatible { context serverside } } rules { exchange2016_owa_redirect_irule exchange2016_pool_select_irule } source 0.0.0.0/0 source-address-translation { type automap } translate-address enabled translate-port enabled }
