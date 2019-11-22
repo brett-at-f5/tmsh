@@ -15,5 +15,5 @@ create ltm profile dns resolver_cache_dns_profile { defaults-from dns enable-dns
 create ltm profile udp dns_udp_profile defaults-from udp_gtm_dns
 create ltm profile tcp dns_tcp_profile defaults-from f5-tcp-lan
 
-create ltm virtual resolver_udp_dns_vs { destination 10.1.10.53:53 ip-protocol udp profiles replace-all-with { resolver_cache_dns_profile dns_udp_profile } source-address-translation { type automap } pool internet_dns_pool }
-create ltm virtual resolver_tcp_dns_vs { destination 10.1.10.53:53 ip-protocol tcp profiles replace-all-with { resolver_cache_dns_profile dns_tcp_profile } source-address-translation { type automap } pool internet_dns_pool }
+create ltm virtual resolver_udp_dns_vs { destination 10.1.10.53:53 ip-protocol udp profiles replace-all-with { resolver_cache_dns_profile dns_udp_profile } source-address-translation { type automap } pool internet_dns_pool description "DNS Resolver - UDP"}
+create ltm virtual resolver_tcp_dns_vs { destination 10.1.10.53:53 ip-protocol tcp profiles replace-all-with { resolver_cache_dns_profile dns_tcp_profile } source-address-translation { type automap } pool internet_dns_pool description "DNS Resolver - TCP"}
