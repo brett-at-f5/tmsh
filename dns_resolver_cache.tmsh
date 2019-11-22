@@ -1,0 +1,19 @@
+create ltm node dns.quad9.net { address 9.9.9.9 description "Quad9 DNS" }
+create ltm node google-public-dns-a.google.com { address 8.8.8.8 description "Google DNS"}
+create ltm node google-public-dns-b.google.com { address 8.8.4.4 description "Google DNS"}
+create ltm node one.one.one.one { address 1.1.1.1 description "Cloudflare DNS" }
+create ltm node one.zero.zero.one { address 1.0.0.1 description "Cloudflare DNS" }
+
+create ltm monitor dns google.com_dns_monitor defaults-from dns interval 10 timeout 31 qname google.com
+create ltm monitor dns f5.com_dns_monitor defaults-from dns interval 10 timeout 31 qname f5.com
+
+create ltm pool internet_dns_pool { members replace-all-with { dns.quad9.net:53 google-public-dns-a.google.com:53 google-public-dns-b.google.com:53 one.one.one.one:53 one.zero.zero.one:53 } monitor min 1 of { google.com_dns_monitor f5.com_dns_monitor } service-down-action reselect }
+
+create ltm dns cache transparent transparent_dns_cache { }
+
+create ltm profile dns resolver_cache_dns_profile { defaults-from dns enable-dnssec no enable-gtm no enable-dns-express yes enable-cache yes cache transparent_dns_cache unhandled-query-action allow use-local-bind no }
+create ltm profile udp dns_udp_profile defaults-from udp_gtm_dns
+create ltm profile tcp dns_tcp_profile defaults-from f5-tcp-lan
+
+create ltm virtual resolver_udp_dns_vs { destination 10.1.10.53:53 ip-protocol udp profiles replace-all-with { resolver_cache_dns_profile dns_udp_profile } source-address-translation { type automap } pool internet_dns_pool }
+create ltm virtual resolver_tcp_dns_vs { destination 10.1.10.53:53 ip-protocol tcp profiles replace-all-with { resolver_cache_dns_profile dns_tcp_profile } source-address-translation { type automap } pool internet_dns_pool }
