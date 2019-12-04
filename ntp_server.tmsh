@@ -1,0 +1,13 @@
+create ltm node time1.google.com fqdn { autopopulate enabled name time1.google.com }
+create ltm node time2.google.com fqdn { autopopulate enabled name time2.google.com }
+create ltm node time3.google.com fqdn { autopopulate enabled name time3.google.com }
+create ltm node time4.google.com fqdn { autopopulate enabled name time4.google.com }
+
+create ltm monitor udp ntp_udp_monitor defaults-from udp interval 10 timeout 31
+
+create ltm pool time.google.com_ntp_pool { members replace-all-with { time1.google.com:123 time2.google.com:123 time3.google.com:123 time4.google.com:123 } monitor ntp_udp_monitor service-down-action reset }
+
+create ltm virtual time_udp_ntp_vs { destination 10.1.10.123:123 ip-protocol udp profiles replace-all-with { udp } source-address-translation { type automap } pool time.google.com_ntp_pool description "NTP Server" }
+
+# Transparent NTP Server (optional)
+create ltm virtual proxy_udp_ntp_vs { destination 0.0.0.0:123 ip-protocol udp profiles replace-all-with { udp } vlans-enabled vlans replace-all-with { data_vlan } source-address-translation { type automap } translate-address disabled pool time.google.com_ntp_pool description "NTP Server" }
