@@ -7,7 +7,7 @@ create ltm node one.zero.zero.one { address 1.0.0.1 description "Cloudflare DNS"
 create ltm monitor dns google.com_dns_monitor defaults-from dns interval 10 timeout 31 qname google.com
 create ltm monitor dns f5.com_dns_monitor defaults-from dns interval 10 timeout 31 qname f5.com
 
-create ltm pool internet_dns_pool { members replace-all-with { dns.quad9.net:53 google-public-dns-a.google.com:53 google-public-dns-b.google.com:53 one.one.one.one:53 one.zero.zero.one:53 } monitor min 1 of { google.com_dns_monitor f5.com_dns_monitor } service-down-action reject }
+create ltm pool internet_dns_pool { members replace-all-with { dns.quad9.net:53 google-public-dns-a.google.com:53 google-public-dns-b.google.com:53 one.one.one.one:53 one.zero.zero.one:53 } monitor min 1 of { google.com_dns_monitor f5.com_dns_monitor } service-down-action reset }
 
 create ltm dns cache transparent transparent_dns_cache { }
 
