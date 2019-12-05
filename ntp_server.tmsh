@@ -10,4 +10,4 @@ create ltm pool time.google.com_ntp_pool { members replace-all-with { time1.goog
 create ltm virtual time_udp_ntp_vs { destination 10.1.10.123:123 ip-protocol udp profiles replace-all-with { udp } source-address-translation { type automap } pool time.google.com_ntp_pool description "NTP Server" }
 
 # Transparent NTP Server (optional)
-create ltm virtual proxy_udp_ntp_vs { destination 0.0.0.0:123 ip-protocol udp profiles replace-all-with { udp } vlans-enabled vlans replace-all-with { data_vlan } source-address-translation { type automap } translate-address disabled pool time.google.com_ntp_pool description "NTP Server" }
+create ltm virtual proxy_udp_ntp_vs { destination 0.0.0.0:123 ip-protocol udp profiles replace-all-with { udp } vlans-enabled vlans replace-all-with { data_vlan } source-address-translation { type automap } translate-address disabled pool time.google.com_ntp_pool description "Transparent NTP Server" }
