@@ -1,5 +1,7 @@
 load sys config merge from-terminal 
 
+## Cut / Paste from here: 
+
 ltm profile http exchange2016_http_profile { defaults-from http insert-xforwarded-for enabled redirect-rewrite all }
 ltm profile http-compression exchange2016_compression_profile { content-type-include { "application/(css|css-stylesheet|doc|excel|javascript|json|lotus123|mdb|mpp|msaccess|msexcel|ms-excel|mspowerpoint|ms-powerpoint|msproject|msword|ms-word|photoshop|postscript|powerpoint|ps|psd|quarkexpress|rtf|txt|visio|vnd\\.excel|vnd\\.msaccess|vnd\\.ms-access|vnd\\.msexcel|vnd\\.ms-excel|vnd\\.mspowerpoint|vnd\\.ms-powerpoint|vnd\\.ms-pps|vnd\\.ms-project|vnd\\.msword|vnd\\.ms-word|vnd\\.ms-works|vnd\\.ms-works-db|vnd\\.powerpoint|vnd\\.visio|vnd\\.wap\\.cmlscriptc|vnd\\.wap\\.wmlc|vnd\\.wap\\.xhtml\\+xml|vnd\\.word|vsd|winword|wks|word|x-excel|xhtml\\+xml|x-java-jnlp-file|x-javascript|x-json|x-lotus123|xls|x-mdb|xml|x-mscardfile|x-msclip|x-msexcel|x-ms-excel|x-mspowerpoint|x-msproject|x-ms-project|x-msword|x-msworks-db|x-msworks-wps|x-photoshop|x-postscript|x-powerpoint|x-ps|x-quark-express|x-rtf|x-vermeer-rpc|x-visio|x-vsd|x-wks|x-word|x-xls|x-xml)" "image/(photoshop|psd|x-photoshop|x-vsd)" "text/(css|html|javascript|json|plain|postscript|richtext|rtf|vnd\\.wap\\.wml|vnd\\.wap\\.wmlscript|wap|wml|x-component|xml|x-vcalendar|x-vcard)" } defaults-from wan-optimized-compression }
 ltm profile one-connect exchange2016_oneconnect { defaults-from oneconnect source-mask 255.255.255.255 }
