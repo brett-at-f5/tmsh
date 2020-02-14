@@ -8,4 +8,4 @@ create net tunnels tunnel xp_tcp_tunnel { profile tcp-forward }
 create ltm profile http xp_http_profile defaults-from http-explicit oneconnect-transformations disabled explicit-proxy { default-connect-handling allow tunnel-name xp_tcp_tunnel dns-resolver xp_dns_resolver }
 
 # Create the Explicit Proxy Virtual Server
-create ltm virtual xp_tcp_3128_vs { destination 10.1.20.201:3128 ip-protocol tcp profiles replace-all-with { xp_http_profile } vlans-enabled vlans replace-all-with { ingress_vlan } description "Explicit Proxy" }
+create ltm virtual xp_tcp_3128_vs { destination 10.1.20.201:3128 ip-protocol tcp profiles replace-all-with { xp_http_profile } source-address-translation { type automap } vlans-enabled vlans replace-all-with { ingress_vlan } description "Explicit Proxy" }
