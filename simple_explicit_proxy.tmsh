@@ -1,0 +1,11 @@
+# Create the DNS Resolver for the HTTP profile
+create net dns-resolver xp_dns_resolver forward-zones replace-all-with { . { nameservers replace-all-with { 8.8.8.8:53 8.8.4.4:53 } } }
+
+# Create the TCP Tunnel for the HTTP profile
+create net tunnels tunnel xp_tcp_tunnel { profile tcp-forward }
+
+# Create the Explicit Proxy HTTP profile
+create ltm profile http xp_http_profile defaults-from http-explicit oneconnect-transformations disabled explicit-proxy { default-connect-handling allow tunnel-name xp_tcp_tunnel dns-resolver xp_dns_resolver }
+
+# Create the Explicit Proxy Virtual Server
+create ltm virtual xp_tcp_3128_vs { destination 10.1.20.201:3128 ip-protocol tcp profiles replace-all-with { xp_http_profile } vlans-enabled vlans replace-all-with { ingress_vlan } description "Explicit Proxy" }
