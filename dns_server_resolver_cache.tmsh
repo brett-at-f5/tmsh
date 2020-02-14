@@ -1,3 +1,5 @@
+# DNS Server - Cache Resolver
+
 create ltm node dns.quad9.net { address 9.9.9.9 description "Quad9 DNS" }
 create ltm node google-public-dns-a.google.com { address 8.8.8.8 description "Google DNS"}
 create ltm node google-public-dns-b.google.com { address 8.8.4.4 description "Google DNS"}
