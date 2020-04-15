@@ -6,6 +6,7 @@ create ltm cipher group mozilla_intermediate_cipher_group_v13 allow replace-all-
 
 BIG-IP 14.x
 create ltm cipher group mozilla_intermediate_cipher_group_v14 allow replace-all-with { mozilla_intermediate_cipher_rule_tls1_2 mozilla_modern_cipher_rule_tls1_3 }
+create ltm cipher group mozilla_modern_cipher_group_v14 allow replace-all-with { mozilla_modern_cipher_rule_tls1_3 }
 
 Update SSL Profile:
 modify ltm profile client-ssl f5.demo_clientssl cipher-group mozilla_intermediate_cipher_group_v14
