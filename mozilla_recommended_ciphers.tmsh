@@ -1,0 +1,11 @@
+create ltm cipher rule mozilla_intermediate_cipher_rule_tls1_2 cipher ECDHE+AES-GCM:ECDH_ECDSA+AES-GCM:DHE+AES-GCM dh-groups DEFAULT signature-algorithms DEFAULT description https://wiki.mozilla.org/Security/Server_Side_TLS
+create ltm cipher rule mozilla_modern_cipher_rule_tls1_3 cipher TLSv1_3 dh-groups DEFAULT signature-algorithms DEFAULT description https://wiki.mozilla.org/Security/Server_Side_TLS
+
+BIG-IP 13.x
+create ltm cipher group mozilla_intermediate_cipher_group_v13 allow replace-all-with { mozilla_intermediate_cipher_rule_tls1_2 }
+
+BIG-IP 14.x
+create ltm cipher group mozilla_intermediate_cipher_group_v14 allow replace-all-with { mozilla_intermediate_cipher_rule_tls1_2 mozilla_modern_cipher_rule_tls1_3 }
+
+Update SSL Profile:
+modify ltm profile client-ssl f5.demo_clientssl cipher-group mozilla_intermediate_cipher_group_v14
