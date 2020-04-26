@@ -14,7 +14,7 @@ Modern (TLS 1.3) Only:
 create ltm cipher group mozilla_modern_cipher_group allow replace-all-with { mozilla_modern_cipher_rule_tls1_3 }
 
 Update SSL Profile:
-BIG-IP 13.x
+BIG-IP 13.x plus
 modify ltm profile client-ssl f5.demo_clientssl cipher-group mozilla_intermediate_cipher_group_v13
 
 BIG-IP 14.x plus
