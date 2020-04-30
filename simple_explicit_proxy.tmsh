@@ -7,7 +7,7 @@ create net tunnels tunnel xp_tcp_tunnel { profile tcp-forward }
 # Create the Explicit Proxy HTTP profile
 create ltm profile http xp_http_profile defaults-from http-explicit oneconnect-transformations disabled explicit-proxy { default-connect-handling allow tunnel-name xp_tcp_tunnel dns-resolver xp_dns_resolver }
 
-# Create a customt TCP profile for the Explicit Proxy Virtual Server
+# Create a custom TCP profile for the Explicit Proxy Virtual Server
 create ltm profile tcp xp_tcp_profile { defaults-from f5-tcp-progressive syn-cookie-enable disabled }
 
 # Create the Explicit Proxy Virtual Server
