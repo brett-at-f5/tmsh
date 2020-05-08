@@ -13,9 +13,5 @@ create ltm cipher group mozilla_intermediate_cipher_group allow replace-all-with
 Modern (TLS 1.3) Only:
 create ltm cipher group mozilla_modern_cipher_group allow replace-all-with { mozilla_modern_cipher_rule_tls1_3 }
 
-Update SSL Profile:
-BIG-IP 13.x plus
-modify ltm profile client-ssl f5.demo_clientssl cipher-group mozilla_intermediate_cipher_group_v13
-
-BIG-IP 14.x plus
-modify ltm profile client-ssl f5.demo_clientssl cipher-group mozilla_intermediate_cipher_group
+Create SSL Profile:
+create ltm profile client-ssl f5.com_clientssl defaults-from clientssl cert-key-chain replace-all-with { f5.com { cert f5.com key f5.com chain lets_encrypt_bundle } } ciphers none cipher-group mozilla_intermediate_cipher_group options { dont-insert-empty-fragments }
