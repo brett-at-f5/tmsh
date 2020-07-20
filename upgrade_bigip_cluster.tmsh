@@ -8,9 +8,9 @@
 scp BIGIP-13.1.1.5-0.0.4.iso root@4000-1.f5.demo:/shared/images/
 scp BIGIP-13.1.1.5-0.0.4.iso root@4000-2.f5.demo:/shared/images/
 
-## 4000-1.f5.demo (Active) ##
+## On 4000-1.f5.demo (Active) ##
 # Install BIG-IP ISO
-show sys software status 
+tmsh# show sys software status 
 
 --------------------------------------------------
 Sys::Software Status
@@ -19,13 +19,13 @@ Volume  Product   Version  Build  Active    Status
 HD1.1    BIG-IP  13.1.0.6  0.0.3     yes  complete
 
 # Install software and create new volume (if required)
-install sys software image BIGIP-13.1.1.5-0.0.4.iso create-volume volume HD1.2
+tmsh# install sys software image BIGIP-13.1.1.5-0.0.4.iso create-volume volume HD1.2
 
 # OR Install software in an existing volume
-install sys software image BIGIP-13.1.1.5-0.0.4.iso volume HD1.1
+tmsh# install sys software image BIGIP-13.1.1.5-0.0.4.iso volume HD1.1
 
 # Check the software installation status
-show sys software status 
+tmsh# show sys software status 
 
 -----------------------------------------------------------------------------------
 Sys::Software Status
@@ -36,7 +36,7 @@ HD1.2      none      none   none      no  testing archive: BIGIP-13.1.1.5-0.0.4.
 
 
 ## Wait 10 minutes or so ##
-show sys software status
+tmsh# show sys software status
 
 --------------------------------------------------
 Sys::Software Status
@@ -45,14 +45,17 @@ Volume  Product   Version  Build  Active    Status
 HD1.1    BIG-IP  13.1.0.6  0.0.3     yes  complete
 HD1.2    BIG-IP  13.1.1.5  0.0.4      no  complete
 
+# Backup the BIG-IP
+bash# tmsh save sys ucs /var/local/ucs/$HOSTNAME-$(date +%Y%m%d-%H%M).ucs
+
 # Copy running config to new Volume
 bash# cpcfg --source=HD1.1 HD1.2
 
 
 
-## 4000-2.f5.demo ##
+## On 4000-2.f5.demo (Standby) ##
 # Install BIG-IP ISO
-show sys software status 
+tmsh# show sys software status 
 
 --------------------------------------------------
 Sys::Software Status
@@ -61,13 +64,13 @@ Volume  Product   Version  Build  Active    Status
 HD1.1    BIG-IP  13.1.0.6  0.0.3     yes  complete
 
 # Install software and create new volume (if required)
-install sys software image BIGIP-13.1.1.5-0.0.4.iso create-volume volume HD1.2
+tmsh# install sys software image BIGIP-13.1.1.5-0.0.4.iso create-volume volume HD1.2
 
 # OR Install software in an existing volume
-install sys software image BIGIP-13.1.1.5-0.0.4.iso volume HD1.1
+tmsh# install sys software image BIGIP-13.1.1.5-0.0.4.iso volume HD1.1
 
 # Check the software installation status
-show sys software status 
+tmsh# show sys software status 
 
 -----------------------------------------------------------------------------------
 Sys::Software Status
@@ -77,7 +80,7 @@ HD1.1    BIG-IP  13.1.0.6  0.0.3     yes                                   compl
 HD1.2      none      none   none      no  testing archive: BIGIP-13.1.1.5-0.0.4.iso
 
 ## Wait 10 minutes or so ##
-show sys software status
+tmsh# show sys software status
 
 --------------------------------------------------
 Sys::Software Status
@@ -86,20 +89,24 @@ Volume  Product   Version  Build  Active    Status
 HD1.1    BIG-IP  13.1.0.6  0.0.3     yes  complete
 HD1.2    BIG-IP  13.1.1.5  0.0.4      no  complete
 
+# Backup the BIG-IP
+bash# tmsh save sys ucs /var/local/ucs/$HOSTNAME-$(date +%Y%m%d-%H%M).ucs
+
 # Copy running config to new Volume
 bash# cpcfg --source=HD1.1 HD1.2
 
 
-# On the Standby Device, boot into the new volume
+# On the Standby Device (4000-2.f5.demo), boot into the new volume
 bash# switchboot
 bash# reboot
 
 
-## 4000-1.f5.demo ##
+## On 4000-1.f5.demo (Active) ##
 
-# Force Active Offline after Standby Upgrade (4000-2). Cluster will be in a Disconnected state
-run sys failover offline
+# Force Active (4000-1.f5.demo) Offline after Standby Upgrade (4000-2.f5.demo) completed and reboot finished.
+# Cluster will be in a Disconnected state and 4000-2.f5.demo will become Active.
+tmsh# run sys failover offline
 
-# Boot into the new volume
+# On the Standby Device (4000-1.f5.demo), boot into the new volume
 bash# switchboot
 bash# reboot
