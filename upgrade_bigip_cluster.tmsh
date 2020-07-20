@@ -8,7 +8,7 @@
 scp BIGIP-13.1.1.5-0.0.4.iso root@4000-1.f5.demo:/shared/images/
 scp BIGIP-13.1.1.5-0.0.4.iso root@4000-2.f5.demo:/shared/images/
 
-## 4000-1.f5.demo ##
+## 4000-1.f5.demo (Active) ##
 # Install BIG-IP ISO
 show sys software status 
 
